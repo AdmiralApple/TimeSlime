@@ -5,49 +5,81 @@ using System.Collections.Generic;
 public class SlimeSpringGenerator : MonoBehaviour
 {
     List<Transform> SlimePoints = new List<Transform>();
+    List<Rigidbody2D> SlimeRigidbodies = new List<Rigidbody2D>();
     List<SpringJoint2D> CircumferenceSpringJoints = new List<SpringJoint2D>();
+    List<float> CircumferenceOriginalFrequencies = new List<float>();
     List<SpringJoint2D> InteriorSpringJoints = new List<SpringJoint2D>();
 
+    [SerializeField]
+    private float circumferenceDampingRatio = 0.1f;
+
+    [SerializeField]
+    private float circumferenceFrequencyMultiplier = 1f;
+
+    [SerializeField]
+    private float interiorDampingRatio = 0.05f;
 
     public float CircumferenceFrequencency = 4f;
     public float InteriorFrequency = 2f;
 
     //dampness slider
-    [ShowInInspector, PropertyRange(0, 10)]
+    [ShowInInspector, PropertyRange(0, 1)]
     public float CircumferenceDampingRatio {
-        get { return CircumferenceDampingRatio; }
+        get { return circumferenceDampingRatio; }
         set
         {
-            CircumferenceDampingRatio = value;
+            circumferenceDampingRatio = value;
             // Update all existing spring joints with the new damping ratio
             foreach (var point in SlimePoints)
             {
                 var springs = point.GetComponents<SpringJoint2D>();
                 foreach (var spring in springs)
                 {
-                    spring.dampingRatio = CircumferenceDampingRatio;
+                    spring.dampingRatio = circumferenceDampingRatio;
                 }
             }
         }
     }
 
-    [ShowInInspector, PropertyRange(0, 10)]
-    public float InteriorDampingRatio
+    [ShowInInspector, PropertyRange(0.0001, 1)]
+    public float CircumferenceFrequencyMultiplier
     {
-        get { return InteriorDampingRatio; }
+        get { return circumferenceFrequencyMultiplier; }
         set
         {
-            InteriorDampingRatio = value;
+            circumferenceFrequencyMultiplier = value;
+            
+            for (var i = 0; i < CircumferenceSpringJoints.Count; i++)
+            {
+                var spring = CircumferenceSpringJoints[i];
+                var originalFrequency = CircumferenceOriginalFrequencies[i];
+                spring.frequency = originalFrequency * circumferenceFrequencyMultiplier;
+            }
+        }
+    }
+
+    [ShowInInspector, PropertyRange(0, 1)]
+    public float InteriorDampingRatio
+    {
+        get { return interiorDampingRatio; }
+        set
+        {
+            interiorDampingRatio = value;
             // Update all existing spring joints with the new damping ratio
             foreach (var point in SlimePoints)
             {
                 var springs = point.GetComponents<SpringJoint2D>();
                 foreach (var spring in springs)
                 {
-                    spring.dampingRatio = InteriorDampingRatio;
+                    spring.dampingRatio = interiorDampingRatio;
                 }
             }
         }
+    }
+
+    private void Start()
+    {
+        GenerateDynamicSlimePhysics();
     }
 
 
@@ -85,12 +117,12 @@ public class SlimeSpringGenerator : MonoBehaviour
             SpringJoint2D spring1 = SlimePoints[i].gameObject.AddComponent<SpringJoint2D>();
             spring1.connectedBody = SlimePoints[(i - 1 + SlimePoints.Count) % SlimePoints.Count].GetComponent<Rigidbody2D>();
             spring1.frequency = CircumferenceFrequencency;
-            spring1.dampingRatio = 0.1f;
+            spring1.dampingRatio = circumferenceDampingRatio;
 
             SpringJoint2D spring2 = SlimePoints[i].gameObject.AddComponent<SpringJoint2D>();
             spring2.connectedBody = SlimePoints[(i + 1) % SlimePoints.Count].GetComponent<Rigidbody2D>();
             spring2.frequency = CircumferenceFrequencency;
-            spring2.dampingRatio = 0.1f;
+            spring2.dampingRatio = circumferenceDampingRatio;
         }
 
         // Create larger spring joints for each circumference point connecting them to the other points that are not directly connected to them (2D)
@@ -103,7 +135,7 @@ public class SlimeSpringGenerator : MonoBehaviour
                     SpringJoint2D spring = SlimePoints[i].gameObject.AddComponent<SpringJoint2D>();
                     spring.connectedBody = SlimePoints[j].GetComponent<Rigidbody2D>();
                     spring.frequency = InteriorFrequency;
-                    spring.dampingRatio = 0.05f;
+                    spring.dampingRatio = interiorDampingRatio;
                 }
             }
         }
@@ -117,6 +149,7 @@ public class SlimeSpringGenerator : MonoBehaviour
         foreach (Transform child in transform)
         {
             SlimePoints.Add(child);
+            SlimeRigidbodies.Add(child.GetComponent<Rigidbody2D>());
         }
 
         // Place each point equidistant away around this object (2D: x/y only)
@@ -148,9 +181,10 @@ public class SlimeSpringGenerator : MonoBehaviour
                     float distance = Vector3.Distance(SlimePoints[i].position, SlimePoints[j].position);
                     //spring.frequency = Mathf.Max(0.1f, 10f / distance); // Inverse relationship with distance
                     spring.frequency = distance; // Inverse relationship with distance
-                    spring.dampingRatio = 0.05f;
+                    spring.dampingRatio = interiorDampingRatio;
 
                     CircumferenceSpringJoints.Add(spring);
+                    CircumferenceOriginalFrequencies.Add(spring.frequency);
                 }
             }
         }
