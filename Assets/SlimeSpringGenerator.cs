@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class SlimeSpringGenerator : MonoBehaviour
 {
     List<Transform> SlimePoints = new List<Transform>();
-    List<Rigidbody2D> SlimeRigidbodies = new List<Rigidbody2D>();
+    public List<Rigidbody2D> SlimeRigidbodies = new List<Rigidbody2D>();
     List<SpringJoint2D> CircumferenceSpringJoints = new List<SpringJoint2D>();
     List<float> CircumferenceOriginalFrequencies = new List<float>();
     List<SpringJoint2D> InteriorSpringJoints = new List<SpringJoint2D>();
@@ -41,6 +41,8 @@ public class SlimeSpringGenerator : MonoBehaviour
         }
     }
 
+    
+
     [ShowInInspector, PropertyRange(0.0001, 1)]
     public float CircumferenceFrequencyMultiplier
     {
@@ -48,13 +50,19 @@ public class SlimeSpringGenerator : MonoBehaviour
         set
         {
             circumferenceFrequencyMultiplier = value;
-            
-            for (var i = 0; i < CircumferenceSpringJoints.Count; i++)
-            {
-                var spring = CircumferenceSpringJoints[i];
-                var originalFrequency = CircumferenceOriginalFrequencies[i];
-                spring.frequency = originalFrequency * circumferenceFrequencyMultiplier;
-            }
+            SetFrequencyMultiplier();
+
+
+        }
+    }
+
+    void SetFrequencyMultiplier()
+    {
+        for (var i = 0; i < CircumferenceSpringJoints.Count; i++)
+        {
+            var spring = CircumferenceSpringJoints[i];
+            var originalFrequency = CircumferenceOriginalFrequencies[i];
+            spring.frequency = originalFrequency * circumferenceFrequencyMultiplier;
         }
     }
 
@@ -80,6 +88,7 @@ public class SlimeSpringGenerator : MonoBehaviour
     private void Start()
     {
         GenerateDynamicSlimePhysics();
+        SetFrequencyMultiplier();
     }
 
 
@@ -182,6 +191,9 @@ public class SlimeSpringGenerator : MonoBehaviour
                     //spring.frequency = Mathf.Max(0.1f, 10f / distance); // Inverse relationship with distance
                     spring.frequency = distance; // Inverse relationship with distance
                     spring.dampingRatio = interiorDampingRatio;
+                    spring.autoConfigureDistance = false;
+                    spring.anchor = SlimePoints[i].position;
+                    spring.connectedAnchor = SlimePoints[j].position;
 
                     CircumferenceSpringJoints.Add(spring);
                     CircumferenceOriginalFrequencies.Add(spring.frequency);
