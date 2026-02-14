@@ -5,7 +5,7 @@ using System.Collections;
 
 public class SlimeSpringGenerator : MonoBehaviour
 {
-    List<Transform> SlimePoints = new List<Transform>();
+    public List<Transform> SlimePoints = new List<Transform>();
     public List<Rigidbody2D> SlimeRigidbodies = new List<Rigidbody2D>();
     List<SpringJoint2D> CircumferenceSpringJoints = new List<SpringJoint2D>();
     List<float> CircumferenceOriginalFrequencies = new List<float>();
