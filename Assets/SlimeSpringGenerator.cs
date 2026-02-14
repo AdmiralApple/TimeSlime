@@ -1,6 +1,7 @@
 using UnityEngine;
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
+using System.Collections;
 
 public class SlimeSpringGenerator : MonoBehaviour
 {
@@ -41,8 +42,6 @@ public class SlimeSpringGenerator : MonoBehaviour
         }
     }
 
-    
-
     [ShowInInspector, PropertyRange(0.0001, 1)]
     public float CircumferenceFrequencyMultiplier
     {
@@ -55,7 +54,6 @@ public class SlimeSpringGenerator : MonoBehaviour
 
         }
     }
-
     void SetFrequencyMultiplier()
     {
         for (var i = 0; i < CircumferenceSpringJoints.Count; i++)
@@ -89,6 +87,15 @@ public class SlimeSpringGenerator : MonoBehaviour
     {
         GenerateDynamicSlimePhysics();
         SetFrequencyMultiplier();
+        StartCoroutine(DisableAutoDistance());
+    }
+    //courroutine
+
+    IEnumerator DisableAutoDistance()
+    {
+        yield return new WaitForSeconds(0.1f); // Wait a short time to ensure all joints are initialized
+
+        DisableAutoDistanceConfiguration();
     }
 
 
@@ -191,9 +198,13 @@ public class SlimeSpringGenerator : MonoBehaviour
                     //spring.frequency = Mathf.Max(0.1f, 10f / distance); // Inverse relationship with distance
                     spring.frequency = distance; // Inverse relationship with distance
                     spring.dampingRatio = interiorDampingRatio;
-                    spring.autoConfigureDistance = false;
-                    spring.anchor = SlimePoints[i].position;
-                    spring.connectedAnchor = SlimePoints[j].position;
+                    spring.enableCollision = true;
+
+
+                    //spring.autoConfigureConnectedAnchor = true;
+                    //spring.autoConfigureDistance = false;
+                    //spring.anchor = SlimePoints[i].position;
+                    //spring.connectedAnchor = SlimePoints[j].position;
 
                     CircumferenceSpringJoints.Add(spring);
                     CircumferenceOriginalFrequencies.Add(spring.frequency);
@@ -202,6 +213,25 @@ public class SlimeSpringGenerator : MonoBehaviour
         }
 
     }
+
+    [Button]
+    void DisableAutoDistanceConfiguration()
+    {
+        foreach (var spring in CircumferenceSpringJoints)
+        {
+            spring.autoConfigureDistance = false;
+            //spring.distance = Vector3.Distance(spring.transform.position, spring.connectedBody.transform.position);
+        }
+    }
+    [Button]
+    void RemovePointParent()
+    {
+        for(int i = transform.childCount - 1; i >= 0; i--)
+        {
+            transform.GetChild(i).parent = null;
+        }
+    }
+
 
 
 }
