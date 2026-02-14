@@ -12,6 +12,15 @@ public class SlimeSpringGenerator : MonoBehaviour
     List<SpringJoint2D> InteriorSpringJoints = new List<SpringJoint2D>();
 
     [SerializeField]
+    private PhysicsMaterial2D slimePhysicsMaterial;
+
+    [SerializeField]
+    private float slimeLinearDrag = 2f;
+
+    [SerializeField]
+    private float wallStickiness = 12f;
+
+    [SerializeField]
     private float circumferenceDampingRatio = 0.1f;
 
     [SerializeField]
@@ -22,6 +31,7 @@ public class SlimeSpringGenerator : MonoBehaviour
 
     public float CircumferenceFrequencency = 4f;
     public float InteriorFrequency = 2f;
+    readonly ContactPoint2D[] contactBuffer = new ContactPoint2D[8];
 
     //dampness slider
     [ShowInInspector, PropertyRange(0, 1)]
@@ -83,6 +93,27 @@ public class SlimeSpringGenerator : MonoBehaviour
         }
     }
 
+    void ConfigurePointPhysics()
+    {
+        SlimeRigidbodies.Clear();
+        foreach (var point in SlimePoints)
+        {
+            var rb = point.GetComponent<Rigidbody2D>();
+            if (rb == null) rb = point.gameObject.AddComponent<Rigidbody2D>();
+            rb.linearDamping = slimeLinearDrag;
+            SlimeRigidbodies.Add(rb);
+
+            var collider = point.GetComponent<Collider2D>();
+            if (collider == null) collider = point.gameObject.AddComponent<CircleCollider2D>();
+            if (slimePhysicsMaterial != null) collider.sharedMaterial = slimePhysicsMaterial;
+        }
+    }
+
+    void FixedUpdate()
+    {
+        ApplyContactFriction();
+    }
+
     private void Start()
     {
         GenerateDynamicSlimePhysics();
@@ -103,6 +134,10 @@ public class SlimeSpringGenerator : MonoBehaviour
     public void GenerateStaticSlimePhysics()
     {
         SlimePoints.Clear();
+        SlimeRigidbodies.Clear();
+        CircumferenceSpringJoints.Clear();
+        CircumferenceOriginalFrequencies.Clear();
+        InteriorSpringJoints.Clear();
         foreach (Transform child in transform)
         {
             SlimePoints.Add(child);
@@ -116,20 +151,11 @@ public class SlimeSpringGenerator : MonoBehaviour
             SlimePoints[i].localPosition = newPos;
         }
 
-        // Ensure each point has a Rigidbody2D
-        foreach (var point in SlimePoints)
-        {
-            if (point.GetComponent<Rigidbody2D>() == null)
-            {
-                point.gameObject.AddComponent<Rigidbody2D>();
-            }
-        }
+        ConfigurePointPhysics();
 
         // Create two small spring joints for each circumference point connecting them to each other (2D)
         for (int i = 0; i < SlimePoints.Count; i++)
         {
-            var rb = SlimePoints[i].GetComponent<Rigidbody2D>();
-
             SpringJoint2D spring1 = SlimePoints[i].gameObject.AddComponent<SpringJoint2D>();
             spring1.connectedBody = SlimePoints[(i - 1 + SlimePoints.Count) % SlimePoints.Count].GetComponent<Rigidbody2D>();
             spring1.frequency = CircumferenceFrequencency;
@@ -162,10 +188,13 @@ public class SlimeSpringGenerator : MonoBehaviour
     public void GenerateDynamicSlimePhysics()
     {
         SlimePoints.Clear();
+        SlimeRigidbodies.Clear();
+        CircumferenceSpringJoints.Clear();
+        CircumferenceOriginalFrequencies.Clear();
+        InteriorSpringJoints.Clear();
         foreach (Transform child in transform)
         {
             SlimePoints.Add(child);
-            SlimeRigidbodies.Add(child.GetComponent<Rigidbody2D>());
         }
 
         // Place each point equidistant away around this object (2D: x/y only)
@@ -176,14 +205,7 @@ public class SlimeSpringGenerator : MonoBehaviour
             SlimePoints[i].localPosition = newPos;
         }
 
-        // Ensure each point has a Rigidbody2D
-        foreach (var point in SlimePoints)
-        {
-            if (point.GetComponent<Rigidbody2D>() == null)
-            {
-                point.gameObject.AddComponent<Rigidbody2D>();
-            }
-        }
+        ConfigurePointPhysics();
 
         // Create a spring joing between each point with a frequency based on their current distanance from each other (2D)
         for (int i = 0; i < SlimePoints.Count; i++)
@@ -221,6 +243,29 @@ public class SlimeSpringGenerator : MonoBehaviour
         {
             spring.autoConfigureDistance = false;
             //spring.distance = Vector3.Distance(spring.transform.position, spring.connectedBody.transform.position);
+        }
+    }
+
+    void ApplyContactFriction()
+    {
+        if (wallStickiness <= 0f) return;
+
+        foreach (var rb in SlimeRigidbodies)
+        {
+            if (rb == null) continue;
+
+            var contactCount = rb.GetContacts(contactBuffer);
+            if (contactCount == 0) continue;
+
+            for (int i = 0; i < contactCount; i++)
+            {
+                var normal = contactBuffer[i].normal;
+                var tangent = new Vector2(-normal.y, normal.x);
+
+                var tangentVelocity = Vector2.Dot(rb.linearVelocity, tangent);
+                var dampedTangent = Mathf.Lerp(tangentVelocity, 0f, wallStickiness * Time.fixedDeltaTime);
+                rb.linearVelocity += tangent * (dampedTangent - tangentVelocity);
+            }
         }
     }
     [Button]

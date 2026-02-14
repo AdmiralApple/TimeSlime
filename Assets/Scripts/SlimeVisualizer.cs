@@ -7,16 +7,35 @@ public class SlimeVisualizer : MonoBehaviour
     [SerializeField] SlimeSpringGenerator slimeSpringGenerator;
     SpriteShapeController shape;
 
-    private void Update()
+    void Awake()
     {
         if (shape == null) shape = GetComponent<SpriteShapeController>();
-        if(shape.spline.GetPointCount() != slimeSpringGenerator.SlimePoints.Count)
-        {
+    }
 
-        }
+    void LateUpdate()
+    {
+        if (slimeSpringGenerator == null || shape == null) return;
+        SyncShapePointCount();
+
         for (var i = 0; i < slimeSpringGenerator.SlimePoints.Count; i++)
         {
-            shape.spline.SetPosition(i, slimeSpringGenerator.SlimePoints[i].position);
+            // SpriteShape expects positions in local space of the controller
+            var localPos = transform.InverseTransformPoint(slimeSpringGenerator.SlimePoints[i].position);
+            shape.spline.SetPosition(i, localPos);
+        }
+    }
+
+    void SyncShapePointCount()
+    {
+        var desiredCount = slimeSpringGenerator.SlimePoints.Count;
+        if (shape.spline.GetPointCount() == desiredCount) return;
+
+        shape.spline.Clear();
+        for (var i = 0; i < desiredCount; i++)
+        {
+            var localPos = transform.InverseTransformPoint(slimeSpringGenerator.SlimePoints[i].position);
+            shape.spline.InsertPointAt(i, localPos);
+            shape.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
         }
     }
 }
