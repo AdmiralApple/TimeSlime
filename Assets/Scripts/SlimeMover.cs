@@ -5,7 +5,7 @@ using UnityEngine;
 public class SlimeMover : MonoBehaviour
 {
     SlimeSpringGenerator slimeGen;
-    [ShowInInspector, PropertyRange(0, 10)]
+    [ShowInInspector, PropertyRange(0, 100)]
     public float ForceMultiplier = 10f;
 
     [SerializeField]

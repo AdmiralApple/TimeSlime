@@ -11,6 +11,8 @@ public class SlimeSpringGenerator : MonoBehaviour
     List<float> CircumferenceOriginalFrequencies = new List<float>();
     List<SpringJoint2D> InteriorSpringJoints = new List<SpringJoint2D>();
 
+    public Vector2 SlimeCenter => CalculateSlimeCenter();
+
     [SerializeField]
     private PhysicsMaterial2D slimePhysicsMaterial;
 
@@ -120,7 +122,19 @@ public class SlimeSpringGenerator : MonoBehaviour
         SetFrequencyMultiplier();
         StartCoroutine(DisableAutoDistance());
     }
-    //courroutine
+
+    Vector2 CalculateSlimeCenter()
+    {
+        Vector2 center = Vector2.zero;
+        foreach (var point in SlimePoints)
+        {
+            center += (Vector2)point.position;
+        }
+        center /= SlimePoints.Count;
+        return center;
+    }
+
+
 
     IEnumerator DisableAutoDistance()
     {

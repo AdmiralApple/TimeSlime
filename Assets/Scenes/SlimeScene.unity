@@ -191,6 +191,7 @@ GameObject:
   m_Component:
   - component: {fileID: 135011920}
   - component: {fileID: 135011921}
+  - component: {fileID: 135011922}
   m_Layer: 0
   m_Name: Slime Face
   m_TagString: Untagged
@@ -207,7 +208,7 @@ Transform:
   m_GameObject: {fileID: 135011919}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.35638404, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -260,18 +261,31 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -8495036594611615900, guid: 475d618b2f4aea54db387d8bec3b6c10, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 475d618b2f4aea54db387d8bec3b6c10, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.18, y: 0.32}
+  m_Size: {x: 2.56, y: 2.56}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &135011922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 135011919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3b08b4b3dd842744bea9610c32fb06b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  slimeSpringGenerator: {fileID: 225598245}
 --- !u!4 &173648117 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1002954525066823864, guid: 86a3ff809e4b13c4c8bdba21cd26e559, type: 3}
@@ -2310,7 +2324,7 @@ SpriteShapeRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: b0dba511e6e8fd14d88790e65ca65c2b, type: 2}
-  - {fileID: 2100000, guid: b0dba511e6e8fd14d88790e65ca65c2b, type: 2}
+  - {fileID: 2100000, guid: 3f2f5275f51beeb4fbdef47bef2ee622, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2336,7 +2350,6 @@ SpriteShapeRenderer:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_ShapeTexture: {fileID: 2800000, guid: 1234da46c8d106d40bd3a7a6c7ff311a, type: 3}
   m_Sprites:
-  - {fileID: 21300000, guid: 0ae2b74b1edd14bb18dd7b65ae916a54, type: 3}
   - {fileID: 21300000, guid: 608e61deb05c54660bebf5a4dd2ee02d, type: 3}
   - {fileID: 21300000, guid: 608e61deb05c54660bebf5a4dd2ee02d, type: 3}
   - {fileID: 21300000, guid: 608e61deb05c54660bebf5a4dd2ee02d, type: 3}
@@ -2346,8 +2359,8 @@ SpriteShapeRenderer:
   - {fileID: 21300000, guid: 608e61deb05c54660bebf5a4dd2ee02d, type: 3}
   - {fileID: 21300000, guid: 608e61deb05c54660bebf5a4dd2ee02d, type: 3}
   m_LocalAABB:
-    m_Center: {x: 0.00027251244, y: -0.0002721548, z: 0}
-    m_Extent: {x: 2.589231, y: 1.250067, z: 0}
+    m_Center: {x: 0.0002465248, y: -0.00016963482, z: 0}
+    m_Extent: {x: 2.3399153, y: 1.0001695, z: 0}
   m_SpriteSortPoint: 0
 --- !u!1001 &1687268293
 PrefabInstance:
