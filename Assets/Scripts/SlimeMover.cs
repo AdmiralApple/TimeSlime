@@ -42,6 +42,14 @@ public class SlimeMover : MonoBehaviour
             }
 
         }
+        if (Input.GetKey(KeyCode.W)) {
+
+            
+            Vector2 averageVelocity = slimeGen.AverageSlimeVelocity;
+            //Jump = 50 force in up direction mixed with averageVelocity x direction
+            Vector2 jumpForce = new Vector2(averageVelocity.x, 1f) * ForceMultiplier * 5f; // Adjust the jump force as needed
+
+        }
 
         if (SoftCapVelocity)
         {

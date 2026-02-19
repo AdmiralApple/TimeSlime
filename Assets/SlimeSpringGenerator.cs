@@ -12,6 +12,16 @@ public class SlimeSpringGenerator : MonoBehaviour
     List<SpringJoint2D> InteriorSpringJoints = new List<SpringJoint2D>();
 
     public Vector2 SlimeCenter => CalculateSlimeCenter();
+    public Vector2 AverageSlimeVelocity => CalculateAverageVelocity();
+    Vector2 CalculateAverageVelocity()
+    {
+        Vector2 totalVelocity = Vector2.zero;
+        foreach (var rb in SlimeRigidbodies)
+        {
+            if (rb != null) totalVelocity += rb.linearVelocity;
+        }
+        return totalVelocity / SlimeRigidbodies.Count;
+    }
 
     [SerializeField]
     private PhysicsMaterial2D slimePhysicsMaterial;
