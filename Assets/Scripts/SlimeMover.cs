@@ -8,12 +8,28 @@ public class SlimeMover : MonoBehaviour
     [ShowInInspector, PropertyRange(0, 100)]
     public float ForceMultiplier = 10f;
 
+    [ShowInInspector, PropertyRange(0, 100)]
+    public float JumpForceMultiplier = 10f;
+
     [SerializeField]
     bool SoftCapVelocity = true;
+
+
+    //Cached inputs
+    bool Wcached = false;
     void Start()
     {
         slimeGen = GetComponent<SlimeSpringGenerator>();
 
+    }
+
+    private void Update()
+    {
+        //Cache the W key input to ensure it is only processed once per press
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            Wcached = true;
+        }
     }
 
     void FixedUpdate()
@@ -42,12 +58,17 @@ public class SlimeMover : MonoBehaviour
             }
 
         }
-        if (Input.GetKey(KeyCode.W)) {
+        if (Wcached) {
+            Wcached = false;
 
-            
+            print("Jumping!");
             Vector2 averageVelocity = slimeGen.AverageSlimeVelocity;
             //Jump = 50 force in up direction mixed with averageVelocity x direction
-            Vector2 jumpForce = new Vector2(averageVelocity.x, 1f) * ForceMultiplier * 5f; // Adjust the jump force as needed
+            Vector2 jumpForce = new Vector2(averageVelocity.x, 1f) * ForceMultiplier * JumpForceMultiplier; // Adjust the jump force as needed
+            foreach (Rigidbody2D rb in slimeGen.SlimeRigidbodies)
+            {
+                rb.AddForce(jumpForce);
+            }
 
         }
 
