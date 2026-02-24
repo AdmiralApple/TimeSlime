@@ -60,10 +60,8 @@ public class SlimeMover : MonoBehaviour
         }
         if (Wcached) {
             Wcached = false;
-
-            print("Jumping!");
             Vector2 averageVelocity = slimeGen.AverageSlimeVelocity;
-            //Jump = 50 force in up direction mixed with averageVelocity x direction
+            //Jump = force in up direction mixed with averageVelocity x direction
             Vector2 jumpForce = new Vector2(averageVelocity.x, 1f) * ForceMultiplier * JumpForceMultiplier; // Adjust the jump force as needed
             foreach (Rigidbody2D rb in slimeGen.SlimeRigidbodies)
             {
